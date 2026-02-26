@@ -101,6 +101,7 @@ const Index = () => {
           getPageViewport={getPageViewport}
           pageNumber={currentPage}
           zoom={zoom}
+          onZoomChange={setZoom}
           onSwipeLeft={() => handlePageChange(currentPage + 1)}
           onSwipeRight={() => handlePageChange(currentPage - 1)}
         />
