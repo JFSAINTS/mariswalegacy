@@ -1,6 +1,6 @@
 import {
   ChevronLeft, ChevronRight, Search, Bookmark, BookmarkCheck,
-  Menu, ZoomIn, ZoomOut, Moon, Sun,
+  Menu, ZoomIn, ZoomOut, Moon, Sun, Languages,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,6 +12,7 @@ interface Props {
   onPageChange: (page: number) => void;
   onToggleSidebar: () => void;
   onToggleSearch: () => void;
+  onToggleTranslate: () => void;
   isBookmarked: boolean;
   onToggleBookmark: () => void;
   zoom: number;
@@ -22,7 +23,7 @@ interface Props {
 
 export function ViewerToolbar({
   currentPage, numPages, onPageChange, onToggleSidebar, onToggleSearch,
-  isBookmarked, onToggleBookmark, zoom, onZoomChange, isDark, onToggleTheme,
+  onToggleTranslate, isBookmarked, onToggleBookmark, zoom, onZoomChange, isDark, onToggleTheme,
 }: Props) {
   const [editing, setEditing] = useState(false);
   const [pageInput, setPageInput] = useState('');
@@ -80,6 +81,9 @@ export function ViewerToolbar({
         </Button>
         <Button variant="ghost" size="icon" onClick={onToggleSearch} className="h-8 w-8">
           <Search className="h-4 w-4" />
+        </Button>
+        <Button variant="ghost" size="icon" onClick={onToggleTranslate} className="h-8 w-8" title="Traducir página">
+          <Languages className="h-4 w-4" />
         </Button>
         <Button variant="ghost" size="icon" onClick={onToggleBookmark} className="h-8 w-8">
           {isBookmarked ? <BookmarkCheck className="h-4 w-4 text-primary" /> : <Bookmark className="h-4 w-4" />}
