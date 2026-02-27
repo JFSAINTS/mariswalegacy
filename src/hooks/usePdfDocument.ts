@@ -127,8 +127,16 @@ export function usePdfDocument(url: string) {
     return page.getViewport({ scale });
   }, []);
 
+  const getPageAnnotations = useCallback(async (pageNum: number) => {
+    const doc = pdfRef.current;
+    if (!doc) return [];
+    const page = await doc.getPage(pageNum);
+    const annotations = await page.getAnnotations();
+    return annotations.filter((a: any) => a.subtype === 'Link' && a.url);
+  }, []);
+
   return {
     numPages, loading, error, outline,
-    renderPage, getPageText, searchAllPages, resolveDestination, getPageViewport,
+    renderPage, getPageText, searchAllPages, resolveDestination, getPageViewport, getPageAnnotations,
   };
 }

@@ -1,8 +1,14 @@
 import { useRef, useEffect, useState, useCallback } from 'react';
 
+interface LinkAnnotation {
+  url: string;
+  rect: number[];
+}
+
 interface Props {
   renderPage: (pageNum: number, canvas: HTMLCanvasElement, scale: number) => Promise<any>;
   getPageViewport: (pageNum: number, scale: number) => Promise<any>;
+  getPageAnnotations?: (pageNum: number) => Promise<LinkAnnotation[]>;
   pageNumber: number;
   zoom: number;
   onZoomChange?: (zoom: number) => void;
@@ -10,10 +16,12 @@ interface Props {
   onSwipeRight?: () => void;
 }
 
-export function PdfCanvas({ renderPage, getPageViewport, pageNumber, zoom, onZoomChange, onSwipeLeft, onSwipeRight }: Props) {
+export function PdfCanvas({ renderPage, getPageViewport, getPageAnnotations, pageNumber, zoom, onZoomChange, onSwipeLeft, onSwipeRight }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [rendering, setRendering] = useState(false);
+  const [links, setLinks] = useState<{ url: string; left: number; top: number; width: number; height: number }[]>([]);
+  const [canvasSize, setCanvasSize] = useState<{ width: number; height: number }>({ width: 0, height: 0 });
   const touchStart = useRef<{ x: number; y: number } | null>(null);
   const pinchStartDist = useRef<number | null>(null);
   const pinchStartZoom = useRef<number>(1);
@@ -30,7 +38,6 @@ export function PdfCanvas({ renderPage, getPageViewport, pageNumber, zoom, onZoo
         const viewport = await getPageViewport(pageNumber, 1);
         if (!viewport || cancelled) return;
 
-        // Fit page fully inside container (both width and height)
         const containerWidth = container.clientWidth - 32;
         const containerHeight = container.clientHeight - 32;
         const scaleW = containerWidth / viewport.width;
@@ -41,8 +48,28 @@ export function PdfCanvas({ renderPage, getPageViewport, pageNumber, zoom, onZoo
 
         await renderPage(pageNumber, canvas, finalScale * dpr);
 
-        canvas.style.width = `${viewport.width * finalScale}px`;
-        canvas.style.height = `${viewport.height * finalScale}px`;
+        const displayWidth = viewport.width * finalScale;
+        const displayHeight = viewport.height * finalScale;
+        canvas.style.width = `${displayWidth}px`;
+        canvas.style.height = `${displayHeight}px`;
+        setCanvasSize({ width: displayWidth, height: displayHeight });
+
+        // Get link annotations
+        if (getPageAnnotations) {
+          const annotations = await getPageAnnotations(pageNumber);
+          if (!cancelled) {
+            const pageViewport = await getPageViewport(pageNumber, finalScale);
+            const mappedLinks = annotations.map((a: any) => {
+              const rect = pageViewport.convertToViewportRectangle(a.rect);
+              const left = Math.min(rect[0], rect[2]);
+              const top = Math.min(rect[1], rect[3]);
+              const width = Math.abs(rect[2] - rect[0]);
+              const height = Math.abs(rect[3] - rect[1]);
+              return { url: a.url, left, top, width, height };
+            });
+            setLinks(mappedLinks);
+          }
+        }
       } catch (e) {
         console.error('Render error:', e);
       }
@@ -50,7 +77,7 @@ export function PdfCanvas({ renderPage, getPageViewport, pageNumber, zoom, onZoo
     };
     render();
     return () => { cancelled = true; };
-  }, [renderPage, getPageViewport, pageNumber, zoom]);
+  }, [renderPage, getPageViewport, getPageAnnotations, pageNumber, zoom]);
 
   // Swipe for page navigation (single finger)
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
@@ -116,10 +143,28 @@ export function PdfCanvas({ renderPage, getPageViewport, pageNumber, zoom, onZoo
       onTouchEnd={handleTouchEnd}
       onWheel={handleWheel}
     >
-      <canvas
-        ref={canvasRef}
-        className={`shadow-xl rounded-sm transition-opacity duration-200 ${rendering ? 'opacity-50' : 'opacity-100'}`}
-      />
+      <div className="relative">
+        <canvas
+          ref={canvasRef}
+          className={`shadow-xl rounded-sm transition-opacity duration-200 ${rendering ? 'opacity-50' : 'opacity-100'}`}
+        />
+        {links.map((link, i) => (
+          <a
+            key={i}
+            href={link.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="absolute border border-transparent hover:border-primary/40 hover:bg-primary/10 rounded-sm cursor-pointer transition-colors"
+            style={{
+              left: `${link.left}px`,
+              top: `${link.top}px`,
+              width: `${link.width}px`,
+              height: `${link.height}px`,
+            }}
+            title={link.url}
+          />
+        ))}
+      </div>
     </div>
   );
 }
