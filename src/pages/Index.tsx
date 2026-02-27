@@ -97,6 +97,10 @@ const Index = () => {
           onOutlineClick={handleOutlineClick}
           onRemoveBookmark={removeBookmark}
           onUpdateBookmark={updateBookmark}
+          numPages={numPages}
+          currentPage={currentPage}
+          renderPage={renderPage}
+          getPageViewport={getPageViewport}
         />
 
         <PdfCanvas
