@@ -1,7 +1,7 @@
-import { X, FileText, BookMarked, ChevronRight, ChevronDown, Trash2, Edit2 } from 'lucide-react';
+import { X, FileText, BookMarked, ChevronRight, ChevronDown, Trash2, Edit2, LayoutGrid } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { useState } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import type { OutlineItem } from '@/hooks/usePdfDocument';
 import type { Bookmark } from '@/hooks/useBookmarks';
 
@@ -14,9 +14,13 @@ interface Props {
   onOutlineClick: (dest: any) => void;
   onRemoveBookmark: (id: string) => void;
   onUpdateBookmark: (id: string, title: string) => void;
+  numPages: number;
+  currentPage: number;
+  renderPage: (pageNum: number, canvas: HTMLCanvasElement, scale: number) => Promise<any>;
+  getPageViewport: (pageNum: number, scale: number) => Promise<any>;
 }
 
-type Tab = 'outline' | 'bookmarks';
+type Tab = 'outline' | 'bookmarks' | 'thumbnails';
 
 function OutlineTree({ items, onOutlineClick, depth = 0 }: {
   items: OutlineItem[];
@@ -64,10 +68,53 @@ function OutlineTree({ items, onOutlineClick, depth = 0 }: {
   );
 }
 
+function Thumbnail({ pageNum, renderPage, getPageViewport, isActive, onClick }: {
+  pageNum: number;
+  renderPage: Props['renderPage'];
+  getPageViewport: Props['getPageViewport'];
+  isActive: boolean;
+  onClick: () => void;
+}) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const rendered = useRef(false);
+
+  useEffect(() => {
+    if (rendered.current) return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    rendered.current = true;
+
+    (async () => {
+      const vp = await getPageViewport(pageNum, 1);
+      if (!vp) return;
+      const thumbWidth = 200;
+      const scale = thumbWidth / vp.width;
+      await renderPage(pageNum, canvas, scale * (window.devicePixelRatio || 1));
+      canvas.style.width = `${vp.width * scale}px`;
+      canvas.style.height = `${vp.height * scale}px`;
+    })();
+  }, [pageNum, renderPage, getPageViewport]);
+
+  return (
+    <button
+      onClick={onClick}
+      className={`w-full flex flex-col items-center gap-1 p-2 rounded-lg transition-colors ${
+        isActive ? 'bg-primary/10 ring-2 ring-primary' : 'hover:bg-secondary/60'
+      }`}
+    >
+      <canvas ref={canvasRef} className="rounded shadow-sm max-w-full" />
+      <span className={`text-xs tabular-nums ${isActive ? 'text-primary font-semibold' : 'text-muted-foreground'}`}>
+        {pageNum}
+      </span>
+    </button>
+  );
+}
+
 export function SidePanel({
   open, onClose, outline, bookmarks, onNavigate, onOutlineClick, onRemoveBookmark, onUpdateBookmark,
+  numPages, currentPage, renderPage, getPageViewport,
 }: Props) {
-  const [tab, setTab] = useState<Tab>(outline.length > 0 ? 'outline' : 'bookmarks');
+  const [tab, setTab] = useState<Tab>(outline.length > 0 ? 'outline' : 'thumbnails');
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editTitle, setEditTitle] = useState('');
 
@@ -108,6 +155,15 @@ export function SidePanel({
               Índice
             </button>
             <button
+              onClick={() => setTab('thumbnails')}
+              className={`px-2.5 py-1.5 text-xs font-medium rounded-md transition-colors flex items-center gap-1.5 ${
+                tab === 'thumbnails' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-secondary'
+              }`}
+            >
+              <LayoutGrid className="h-3.5 w-3.5" />
+              Páginas
+            </button>
+            <button
               onClick={() => setTab('bookmarks')}
               className={`px-2.5 py-1.5 text-xs font-medium rounded-md transition-colors flex items-center gap-1.5 ${
                 tab === 'bookmarks' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-secondary'
@@ -131,6 +187,21 @@ export function SidePanel({
                 Este PDF no tiene índice estructurado
               </p>
             )
+          )}
+
+          {tab === 'thumbnails' && (
+            <div className="grid grid-cols-1 gap-2">
+              {Array.from({ length: numPages }, (_, i) => i + 1).map(p => (
+                <Thumbnail
+                  key={p}
+                  pageNum={p}
+                  renderPage={renderPage}
+                  getPageViewport={getPageViewport}
+                  isActive={p === currentPage}
+                  onClick={() => onNavigate(p)}
+                />
+              ))}
+            </div>
           )}
 
           {tab === 'bookmarks' && (
