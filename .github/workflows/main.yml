@@ -17,7 +17,7 @@ jobs:
       - name: Configurar Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22' # Actualizado a Node.js v22
 
       - name: Instalar dependencias de la PWA
         run: npm install
