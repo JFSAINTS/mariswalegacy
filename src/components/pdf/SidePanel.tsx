@@ -137,9 +137,9 @@ export function SidePanel({
       )}
 
       <div className={`
-        fixed left-0 top-0 bottom-0 w-72 bg-card border-r z-40
+        fixed right-0 top-0 bottom-0 w-72 bg-card border-l z-40
         transform transition-transform duration-300 ease-in-out
-        ${open ? 'translate-x-0' : '-translate-x-full'}
+        ${open ? 'translate-x-0' : 'translate-x-full'}
         lg:relative lg:z-10
         flex flex-col shadow-xl
       `}>
