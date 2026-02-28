@@ -28,8 +28,9 @@ jobs:
       - name: Instalar Capacitor CLI
         run: npm install -g @capacitor/cli
 
+      # CAMBIO: Usamos 'sync' en lugar de 'copy' para generar archivos de configuración de Gradle
       - name: Sincronizar Capacitor con el proyecto web
-        run: npx capacitor copy android
+        run: npx cap sync android
 
       - name: Configurar Java y Android SDK
         uses: actions/setup-java@v4
@@ -40,7 +41,7 @@ jobs:
       - name: Configurar Gradle para Android
         uses: gradle/actions/setup-gradle@v3
 
-      # PASO CLAVE: Otorgar permisos al ejecutable de Gradle
+      # CAMBIO: Otorgamos permisos de ejecución al script gradlew para evitar 'Permission denied'
       - name: Dar permisos de ejecución a gradlew
         run: chmod +x android/gradlew
 
