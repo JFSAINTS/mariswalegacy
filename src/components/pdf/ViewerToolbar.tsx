@@ -37,9 +37,27 @@ export function ViewerToolbar({
 
   return (
     <header className="h-14 flex items-center px-2 gap-1 border-b bg-card/90 backdrop-blur-sm shrink-0 z-20">
-      <Button variant="ghost" size="icon" onClick={onToggleSidebar} className="shrink-0">
-        <Menu className="h-5 w-5" />
-      </Button>
+      <div className="flex items-center gap-0.5 shrink-0">
+        <Button variant="ghost" size="icon" onClick={() => onZoomChange(Math.max(0.5, zoom - 0.25))} className="h-8 w-8 hidden sm:flex">
+          <ZoomOut className="h-4 w-4" />
+        </Button>
+        <span className="text-xs tabular-nums w-9 text-center hidden sm:block text-muted-foreground">{Math.round(zoom * 100)}%</span>
+        <Button variant="ghost" size="icon" onClick={() => onZoomChange(Math.min(3, zoom + 0.25))} className="h-8 w-8 hidden sm:flex">
+          <ZoomIn className="h-4 w-4" />
+        </Button>
+        <Button variant="ghost" size="icon" onClick={onToggleSearch} className="h-8 w-8">
+          <Search className="h-4 w-4" />
+        </Button>
+        <Button variant="ghost" size="icon" onClick={onToggleTranslate} className="h-8 w-8" title="Traducir página">
+          <Languages className="h-4 w-4" />
+        </Button>
+        <Button variant="ghost" size="icon" onClick={onToggleBookmark} className="h-8 w-8">
+          {isBookmarked ? <BookmarkCheck className="h-4 w-4 text-primary" /> : <Bookmark className="h-4 w-4" />}
+        </Button>
+        <Button variant="ghost" size="icon" onClick={onToggleTheme} className="h-8 w-8">
+          {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+        </Button>
+      </div>
 
       <div className="flex items-center gap-0.5 mx-auto">
         <Button variant="ghost" size="icon" onClick={() => onPageChange(currentPage - 1)} disabled={currentPage <= 1} className="h-8 w-8">
@@ -71,27 +89,9 @@ export function ViewerToolbar({
         </Button>
       </div>
 
-      <div className="flex items-center gap-0.5 shrink-0">
-        <Button variant="ghost" size="icon" onClick={() => onZoomChange(Math.max(0.5, zoom - 0.25))} className="h-8 w-8 hidden sm:flex">
-          <ZoomOut className="h-4 w-4" />
-        </Button>
-        <span className="text-xs tabular-nums w-9 text-center hidden sm:block text-muted-foreground">{Math.round(zoom * 100)}%</span>
-        <Button variant="ghost" size="icon" onClick={() => onZoomChange(Math.min(3, zoom + 0.25))} className="h-8 w-8 hidden sm:flex">
-          <ZoomIn className="h-4 w-4" />
-        </Button>
-        <Button variant="ghost" size="icon" onClick={onToggleSearch} className="h-8 w-8">
-          <Search className="h-4 w-4" />
-        </Button>
-        <Button variant="ghost" size="icon" onClick={onToggleTranslate} className="h-8 w-8" title="Traducir página">
-          <Languages className="h-4 w-4" />
-        </Button>
-        <Button variant="ghost" size="icon" onClick={onToggleBookmark} className="h-8 w-8">
-          {isBookmarked ? <BookmarkCheck className="h-4 w-4 text-primary" /> : <Bookmark className="h-4 w-4" />}
-        </Button>
-        <Button variant="ghost" size="icon" onClick={onToggleTheme} className="h-8 w-8">
-          {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-        </Button>
-      </div>
+      <Button variant="ghost" size="icon" onClick={onToggleSidebar} className="shrink-0">
+        <Menu className="h-5 w-5" />
+      </Button>
     </header>
   );
 }
