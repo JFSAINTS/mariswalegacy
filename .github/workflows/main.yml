@@ -1,4 +1,4 @@
-name: Generar APK de PWA
+name: Generar APK con Capacitor
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  build_apk:
+  build_android:
     runs-on: ubuntu-latest
 
     steps:
@@ -25,43 +25,28 @@ jobs:
       - name: Construir la PWA
         run: npm run build
 
-      - name: Instalar Bubblewrap
-        run: npm install -g @bubblewrap/cli
+      - name: Instalar Capacitor CLI
+        run: npm install -g @capacitor/cli
 
-      - name: Copiar iconos a la carpeta 'dist' (necesario para Bubblewrap)
-        run: |
-          cp ./public/icon-512.png ./dist/icon-512.png || true
-          cp ./public/icon-192.png ./dist/icon-192.png || true
-          # Asegúrate de que los iconos existan en la carpeta 'public' o donde los tengas
+      - name: Sincronizar Capacitor con el proyecto web
+        run: npx capacitor copy android
 
-      - name: Configurar Bubblewrap y generar el proyecto Android
-        run: |
-          # Eliminar proyecto Android anterior si existe para evitar conflictos
-          rm -rf ./android-project
-          
-          # Inicializar Bubblewrap de forma no interactiva
-          bubblewrap init \
-            --manifest https://mariswalegacy.lovable.app/manifest.json \
-            --output-dir ./android-project \
-            --app-name "Mari Swa Transcript" \
-            --package-id com.mariswalegacy.app \
-            --start-url https://mariswalegacy.lovable.app/ \
-            --icon ./dist/icon-512.png \
-            --icon-maskable ./dist/icon-512.png \
-            --splash-screen-color '#1a1a2e' \
-            --theme-color '#1a1a2e' \
-            --display standalone \
-            --orientation portrait \
-            --web-manifest-url https://mariswalegacy.lovable.app/manifest.json \
-            --force
+      - name: Configurar Java y Android SDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
 
-      - name: Construir el APK
+      - name: Configurar Gradle para Android
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: Construir el APK de Android
         run: |
-          cd ./android-project
-          bubblewrap build
+          cd android
+          ./gradlew assembleDebug
 
       - name: Subir el APK como artefacto
         uses: actions/upload-artifact@v4
         with:
           name: mari-swa-transcript-apk
-          path: ./android-project/app/build/outputs/apk/debug/app-debug.apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk
