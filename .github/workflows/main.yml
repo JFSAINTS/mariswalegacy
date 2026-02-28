@@ -17,7 +17,7 @@ jobs:
       - name: Configurar Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '22' # Actualizado a Node.js v22
+          node-version: '22'
 
       - name: Instalar dependencias de la PWA
         run: npm install
@@ -40,11 +40,13 @@ jobs:
       - name: Configurar Gradle para Android
         uses: gradle/actions/setup-gradle@v3
 
+      # PASO CLAVE: Otorgar permisos al ejecutable de Gradle
+      - name: Dar permisos de ejecución a gradlew
+        run: chmod +x android/gradlew
+
       - name: Construir el APK de Android
         run: |
           cd android
-          - name: Grant execute permission for gradlew
-           run: chmod +x android/gradlew
           ./gradlew assembleDebug
 
       - name: Subir el APK como artefacto
