@@ -1,4 +1,5 @@
 import { useRef, useEffect, useState, useCallback } from 'react';
+import { TextLayer } from 'pdfjs-dist';
 
 interface LinkAnnotation {
   url: string;
@@ -9,6 +10,7 @@ interface Props {
   renderPage: (pageNum: number, canvas: HTMLCanvasElement, scale: number) => Promise<any>;
   getPageViewport: (pageNum: number, scale: number) => Promise<any>;
   getPageAnnotations?: (pageNum: number) => Promise<LinkAnnotation[]>;
+  getPageTextContent?: (pageNum: number) => Promise<any>;
   pageNumber: number;
   zoom: number;
   onZoomChange?: (zoom: number) => void;
@@ -16,9 +18,10 @@ interface Props {
   onSwipeRight?: () => void;
 }
 
-export function PdfCanvas({ renderPage, getPageViewport, getPageAnnotations, pageNumber, zoom, onZoomChange, onSwipeLeft, onSwipeRight }: Props) {
+export function PdfCanvas({ renderPage, getPageViewport, getPageAnnotations, getPageTextContent, pageNumber, zoom, onZoomChange, onSwipeLeft, onSwipeRight }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const textLayerRef = useRef<HTMLDivElement>(null);
   const [rendering, setRendering] = useState(false);
   const [links, setLinks] = useState<{ url: string; left: number; top: number; width: number; height: number }[]>([]);
   const [canvasSize, setCanvasSize] = useState<{ width: number; height: number }>({ width: 0, height: 0 });
@@ -49,7 +52,8 @@ export function PdfCanvas({ renderPage, getPageViewport, getPageAnnotations, pag
     let cancelled = false;
     const render = async () => {
       const canvas = canvasRef.current;
-      if (!canvas) return;
+      const textLayerDiv = textLayerRef.current;
+      if (!canvas || !textLayerDiv) return;
 
       setRendering(true);
       try {
@@ -71,6 +75,24 @@ export function PdfCanvas({ renderPage, getPageViewport, getPageAnnotations, pag
         canvas.style.width = `${displayWidth}px`;
         canvas.style.height = `${displayHeight}px`;
         setCanvasSize({ width: displayWidth, height: displayHeight });
+
+        // Render text layer for selection/copy
+        textLayerDiv.innerHTML = '';
+        textLayerDiv.style.width = `${displayWidth}px`;
+        textLayerDiv.style.height = `${displayHeight}px`;
+
+        if (getPageTextContent) {
+          const textContent = await getPageTextContent(pageNumber);
+          if (textContent && !cancelled) {
+            const textViewport = await getPageViewport(pageNumber, finalScale);
+            const textLayer = new TextLayer({
+              textContentSource: textContent,
+              container: textLayerDiv,
+              viewport: textViewport,
+            });
+            await textLayer.render();
+          }
+        }
 
         // Get link annotations
         if (getPageAnnotations) {
@@ -95,7 +117,7 @@ export function PdfCanvas({ renderPage, getPageViewport, getPageAnnotations, pag
     };
     render();
     return () => { cancelled = true; };
-  }, [renderPage, getPageViewport, getPageAnnotations, pageNumber, zoom]);
+  }, [renderPage, getPageViewport, getPageAnnotations, getPageTextContent, pageNumber, zoom]);
 
   // Swipe for page navigation (single finger)
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
@@ -166,13 +188,17 @@ export function PdfCanvas({ renderPage, getPageViewport, getPageAnnotations, pag
           ref={canvasRef}
           className={`shadow-xl rounded-sm transition-opacity duration-200 ${rendering ? 'opacity-50' : 'opacity-100'}`}
         />
+        <div
+          ref={textLayerRef}
+          className="textLayer absolute top-0 left-0"
+        />
         {links.map((link, i) => (
           <a
             key={i}
             href={link.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="absolute border border-transparent hover:border-primary/40 hover:bg-primary/10 rounded-sm cursor-pointer transition-colors"
+            className="absolute border border-transparent hover:border-primary/40 hover:bg-primary/10 rounded-sm cursor-pointer transition-colors z-10"
             style={{
               left: `${link.left}px`,
               top: `${link.top}px`,

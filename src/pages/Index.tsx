@@ -21,7 +21,7 @@ const Index = () => {
 
   const {
     numPages, loading, error, outline,
-    renderPage, searchAllPages, resolveDestination, getPageViewport, getPageText, getPageAnnotations,
+    renderPage, searchAllPages, resolveDestination, getPageViewport, getPageText, getPageAnnotations, getPageTextContent,
   } = usePdfDocument(PDF_URL);
 
   const {
@@ -107,6 +107,7 @@ const Index = () => {
           renderPage={renderPage}
           getPageViewport={getPageViewport}
           getPageAnnotations={getPageAnnotations}
+          getPageTextContent={getPageTextContent}
           pageNumber={currentPage}
           zoom={zoom}
           onZoomChange={setZoom}

@@ -135,8 +135,15 @@ export function usePdfDocument(url: string) {
     return annotations.filter((a: any) => a.subtype === 'Link' && a.url);
   }, []);
 
+  const getPageTextContent = useCallback(async (pageNum: number) => {
+    const doc = pdfRef.current;
+    if (!doc) return null;
+    const page = await doc.getPage(pageNum);
+    return await page.getTextContent();
+  }, []);
+
   return {
     numPages, loading, error, outline,
-    renderPage, getPageText, searchAllPages, resolveDestination, getPageViewport, getPageAnnotations,
+    renderPage, getPageText, searchAllPages, resolveDestination, getPageViewport, getPageAnnotations, getPageTextContent,
   };
 }
