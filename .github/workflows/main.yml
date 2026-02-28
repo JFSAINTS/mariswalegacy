@@ -28,7 +28,7 @@ jobs:
       - name: Instalar Capacitor CLI
         run: npm install -g @capacitor/cli
 
-      # CAMBIO: Usamos 'sync' en lugar de 'copy' para generar archivos de configuración de Gradle
+      # Genera los archivos de configuración necesarios para Gradle
       - name: Sincronizar Capacitor con el proyecto web
         run: npx cap sync android
 
@@ -36,12 +36,13 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '17'
+          # CAMBIO: Actualizado a Java 21 para corregir 'invalid source release: 21'
+          java-version: '21' 
 
       - name: Configurar Gradle para Android
         uses: gradle/actions/setup-gradle@v3
 
-      # CAMBIO: Otorgamos permisos de ejecución al script gradlew para evitar 'Permission denied'
+      # Asegura permisos para ejecutar la compilación
       - name: Dar permisos de ejecución a gradlew
         run: chmod +x android/gradlew
 
