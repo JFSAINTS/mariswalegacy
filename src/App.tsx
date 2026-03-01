@@ -7,7 +7,7 @@ import { ThemeProvider } from "next-themes";
 import { Loader2 } from "lucide-react";
 import { lazy, Suspense } from "react";
 
-const PwaInstallPrompt = lazy(() => import("@/components/PwaInstallPrompt"));
+
 const Index = lazy(() => import("./pages/Index"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
@@ -25,7 +25,7 @@ const App = () => (
       <TooltipProvider>
         <Toaster />
         <Sonner />
-        <Suspense fallback={null}><PwaInstallPrompt /></Suspense>
+        
         <BrowserRouter>
           <Suspense fallback={<PageLoader />}>
             <Routes>

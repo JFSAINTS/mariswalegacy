@@ -1,6 +1,6 @@
 import {
   ChevronLeft, ChevronRight, Search, Bookmark, BookmarkCheck,
-  Menu, ZoomIn, ZoomOut, Moon, Sun, Languages,
+  Menu, ZoomIn, ZoomOut, Moon, Sun, Languages, Download,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -19,11 +19,14 @@ interface Props {
   onZoomChange: (zoom: number) => void;
   isDark: boolean;
   onToggleTheme: () => void;
+  canInstallPwa?: boolean;
+  onInstallPwa?: () => void;
 }
 
 export function ViewerToolbar({
   currentPage, numPages, onPageChange, onToggleSidebar, onToggleSearch,
   onToggleTranslate, isBookmarked, onToggleBookmark, zoom, onZoomChange, isDark, onToggleTheme,
+  canInstallPwa, onInstallPwa,
 }: Props) {
   const [editing, setEditing] = useState(false);
   const [pageInput, setPageInput] = useState('');
@@ -57,6 +60,11 @@ export function ViewerToolbar({
         <Button variant="ghost" size="icon" onClick={onToggleTheme} className="h-8 w-8">
           {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
         </Button>
+        {canInstallPwa && (
+          <Button variant="ghost" size="icon" onClick={onInstallPwa} className="h-8 w-8" title="Instalar como app">
+            <Download className="h-4 w-4 text-primary" />
+          </Button>
+        )}
       </div>
 
       <div className="flex items-center gap-0.5 mx-auto">
