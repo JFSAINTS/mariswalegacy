@@ -7,7 +7,11 @@ interface BeforeInstallPromptEvent extends Event {
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
 }
 
+const isCapacitor = () =>
+  !!(window as any).Capacitor?.isNativePlatform?.() || !!(window as any).Capacitor?.platform;
+
 const isStandalone = () =>
+  isCapacitor() ||
   window.matchMedia('(display-mode: standalone)').matches ||
   (navigator as any).standalone === true;
 
