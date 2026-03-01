@@ -4,10 +4,10 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
-import { lazy, Suspense } from "react";
 import { Loader2 } from "lucide-react";
-import PwaInstallPrompt from "@/components/PwaInstallPrompt";
+import { lazy, Suspense } from "react";
 
+const PwaInstallPrompt = lazy(() => import("@/components/PwaInstallPrompt"));
 const Index = lazy(() => import("./pages/Index"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
@@ -25,7 +25,7 @@ const App = () => (
       <TooltipProvider>
         <Toaster />
         <Sonner />
-        <PwaInstallPrompt />
+        <Suspense fallback={null}><PwaInstallPrompt /></Suspense>
         <BrowserRouter>
           <Suspense fallback={<PageLoader />}>
             <Routes>
