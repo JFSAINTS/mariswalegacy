@@ -1,0 +1,17 @@
+{
+  "name": "Mari Swa Transcriptos Reader",
+  "short_name": "PDFReader",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f7f3ee",
+  "theme_color": "#c67b1a",
+  "orientation": "any",
+  "description": "Visor avanzado de PDF para estudio e investigación",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "64x64",
+      "type": "image/x-icon"
+    }
+  ]
+}
