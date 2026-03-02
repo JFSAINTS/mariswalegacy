@@ -7,7 +7,7 @@ import { PdfCanvas } from '@/components/pdf/PdfCanvas';
 import { ViewerToolbar } from '@/components/pdf/ViewerToolbar';
 import { SidePanel } from '@/components/pdf/SidePanel';
 import { SearchOverlay } from '@/components/pdf/SearchOverlay';
-import { TranslateOverlay } from '@/components/pdf/TranslateOverlay';
+
 import { Loader2, FileWarning, Download, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -18,7 +18,7 @@ const Index = () => {
   const [zoom, setZoom] = useState(1);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
-  const [translateOpen, setTranslateOpen] = useState(false);
+  
   const { theme, setTheme } = useTheme();
   const { canInstall, isIos, promptInstall } = usePwaInstall();
   const [showInstallBanner, setShowInstallBanner] = useState(false);
@@ -88,7 +88,7 @@ const Index = () => {
         onPageChange={handlePageChange}
         onToggleSidebar={() => setSidebarOpen(prev => !prev)}
         onToggleSearch={() => setSearchOpen(prev => !prev)}
-        onToggleTranslate={() => setTranslateOpen(prev => !prev)}
+        
         isBookmarked={isBookmarked(currentPage)}
         onToggleBookmark={() => toggleBookmark(currentPage)}
         zoom={zoom}
@@ -140,13 +140,6 @@ const Index = () => {
           onNavigate={handleSearchNavigate}
         />
 
-        <TranslateOverlay
-          open={translateOpen}
-          onClose={() => setTranslateOpen(false)}
-          getPageText={getPageText}
-          currentPage={currentPage}
-          numPages={numPages}
-        />
       </div>
 
       {showInstallBanner && canInstall && (
