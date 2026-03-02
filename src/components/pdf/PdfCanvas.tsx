@@ -145,7 +145,7 @@ export function PdfCanvas({ renderPage, getPageViewport, getPageAnnotations, get
       const dist = Math.hypot(dx, dy);
       const scale = dist / pinchStartDist.current;
       const newZoom = Math.min(4, Math.max(0.5, pinchStartZoom.current * scale));
-      onZoomChange(Math.round(newZoom * 20) / 20); // snap to 5% increments
+      onZoomChange(Math.round(newZoom * 20) / 20);
     }
   }, [onZoomChange]);
 
