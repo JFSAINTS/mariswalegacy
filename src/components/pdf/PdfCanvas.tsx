@@ -1,5 +1,4 @@
 import { useRef, useEffect, useState, useCallback } from 'react';
-import { TextLayer } from 'pdfjs-dist';
 
 interface LinkAnnotation {
   url: string;
@@ -84,6 +83,7 @@ export function PdfCanvas({ renderPage, getPageViewport, getPageAnnotations, get
         if (getPageTextContent) {
           const textContent = await getPageTextContent(pageNumber);
           if (textContent && !cancelled) {
+            const { TextLayer } = await import('pdfjs-dist');
             const textViewport = await getPageViewport(pageNumber, finalScale);
             const textLayer = new TextLayer({
               textContentSource: textContent,
