@@ -1,6 +1,6 @@
 import {
   ChevronLeft, ChevronRight, Search, Bookmark, BookmarkCheck,
-  Menu, ZoomIn, ZoomOut, Moon, Sun, Languages, Download,
+  Menu, ZoomIn, ZoomOut, Moon, Sun, Download,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,7 +12,6 @@ interface Props {
   onPageChange: (page: number) => void;
   onToggleSidebar: () => void;
   onToggleSearch: () => void;
-  onToggleTranslate: () => void;
   isBookmarked: boolean;
   onToggleBookmark: () => void;
   zoom: number;
@@ -25,7 +24,7 @@ interface Props {
 
 export function ViewerToolbar({
   currentPage, numPages, onPageChange, onToggleSidebar, onToggleSearch,
-  onToggleTranslate, isBookmarked, onToggleBookmark, zoom, onZoomChange, isDark, onToggleTheme,
+  isBookmarked, onToggleBookmark, zoom, onZoomChange, isDark, onToggleTheme,
   canInstallPwa, onInstallPwa,
 }: Props) {
   const [editing, setEditing] = useState(false);
@@ -47,12 +46,6 @@ export function ViewerToolbar({
         <span className="text-xs tabular-nums w-9 text-center hidden sm:block text-muted-foreground">{Math.round(zoom * 100)}%</span>
         <Button variant="ghost" size="icon" onClick={() => onZoomChange(Math.min(3, zoom + 0.25))} className="h-8 w-8 hidden sm:flex">
           <ZoomIn className="h-4 w-4" />
-        </Button>
-        <Button variant="ghost" size="icon" onClick={onToggleSearch} className="h-8 w-8">
-          <Search className="h-4 w-4" />
-        </Button>
-        <Button variant="ghost" size="icon" onClick={onToggleTranslate} className="h-8 w-8" title="Traducir página">
-          <Languages className="h-4 w-4" />
         </Button>
         <Button variant="ghost" size="icon" onClick={onToggleBookmark} className="h-8 w-8">
           {isBookmarked ? <BookmarkCheck className="h-4 w-4 text-primary" /> : <Bookmark className="h-4 w-4" />}
@@ -97,9 +90,14 @@ export function ViewerToolbar({
         </Button>
       </div>
 
-      <Button variant="ghost" size="icon" onClick={onToggleSidebar} className="shrink-0">
-        <Menu className="h-5 w-5" />
-      </Button>
+      <div className="flex items-center gap-0.5 shrink-0">
+        <Button variant="ghost" size="icon" onClick={onToggleSearch} className="h-8 w-8">
+          <Search className="h-4 w-4" />
+        </Button>
+        <Button variant="ghost" size="icon" onClick={onToggleSidebar} className="shrink-0">
+          <Menu className="h-5 w-5" />
+        </Button>
+      </div>
     </header>
   );
 }
