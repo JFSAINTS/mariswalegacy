@@ -30,7 +30,6 @@ export function PdfCanvas({ renderPage, getPageViewport, getPageAnnotations, get
   const containerDims = useRef<{ width: number; height: number }>({ width: 0, height: 0 });
 
   // Cache container dimensions via ResizeObserver to avoid forced reflow
-  // Cache container dimensions via ResizeObserver to avoid forced reflow
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
