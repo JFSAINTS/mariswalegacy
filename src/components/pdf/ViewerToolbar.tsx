@@ -47,9 +47,7 @@ export function ViewerToolbar({
         <Button variant="ghost" size="icon" onClick={() => onZoomChange(Math.min(3, zoom + 0.25))} className="h-8 w-8 hidden sm:flex">
           <ZoomIn className="h-4 w-4" />
         </Button>
-        <Button variant="ghost" size="icon" onClick={onToggleBookmark} className="h-8 w-8">
-          {isBookmarked ? <BookmarkCheck className="h-4 w-4 text-primary" /> : <Bookmark className="h-4 w-4" />}
-        </Button>
+        
         <Button variant="ghost" size="icon" onClick={onToggleTheme} className="h-8 w-8">
           {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
         </Button>
@@ -91,6 +89,9 @@ export function ViewerToolbar({
       </div>
 
       <div className="flex items-center gap-0.5 shrink-0">
+        <Button variant="ghost" size="icon" onClick={onToggleBookmark} className="h-8 w-8">
+          {isBookmarked ? <BookmarkCheck className="h-4 w-4 text-primary" /> : <Bookmark className="h-4 w-4" />}
+        </Button>
         <Button variant="ghost" size="icon" onClick={onToggleSearch} className="h-8 w-8">
           <Search className="h-4 w-4" />
         </Button>
