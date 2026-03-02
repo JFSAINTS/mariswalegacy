@@ -30,6 +30,7 @@ export function PdfCanvas({ renderPage, getPageViewport, getPageAnnotations, get
   const containerDims = useRef<{ width: number; height: number }>({ width: 0, height: 0 });
 
   // Cache container dimensions via ResizeObserver to avoid forced reflow
+  // Cache container dimensions via ResizeObserver to avoid forced reflow
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
@@ -42,8 +43,12 @@ export function PdfCanvas({ renderPage, getPageViewport, getPageAnnotations, get
       }
     });
     ro.observe(container);
-    // Initial measurement
-    containerDims.current = { width: container.clientWidth, height: container.clientHeight };
+    // Defer initial measurement to avoid forced reflow
+    requestAnimationFrame(() => {
+      if (container) {
+        containerDims.current = { width: container.clientWidth, height: container.clientHeight };
+      }
+    });
     return () => ro.disconnect();
   }, []);
 
