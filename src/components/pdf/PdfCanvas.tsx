@@ -9,7 +9,6 @@ interface Props {
   renderPage: (pageNum: number, canvas: HTMLCanvasElement, scale: number) => Promise<any>;
   getPageViewport: (pageNum: number, scale: number) => Promise<any>;
   getPageAnnotations?: (pageNum: number) => Promise<LinkAnnotation[]>;
-  getPageTextContent?: (pageNum: number) => Promise<any>;
   pageNumber: number;
   zoom: number;
   onZoomChange?: (zoom: number) => void;
@@ -17,52 +16,30 @@ interface Props {
   onSwipeRight?: () => void;
 }
 
-export function PdfCanvas({ renderPage, getPageViewport, getPageAnnotations, getPageTextContent, pageNumber, zoom, onZoomChange, onSwipeLeft, onSwipeRight }: Props) {
+export function PdfCanvas({ renderPage, getPageViewport, getPageAnnotations, pageNumber, zoom, onZoomChange, onSwipeLeft, onSwipeRight }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const textLayerRef = useRef<HTMLDivElement>(null);
   const [rendering, setRendering] = useState(false);
   const [links, setLinks] = useState<{ url: string; left: number; top: number; width: number; height: number }[]>([]);
   const [canvasSize, setCanvasSize] = useState<{ width: number; height: number }>({ width: 0, height: 0 });
   const touchStart = useRef<{ x: number; y: number } | null>(null);
   const pinchStartDist = useRef<number | null>(null);
   const pinchStartZoom = useRef<number>(1);
-  const containerDims = useRef<{ width: number; height: number }>({ width: 0, height: 0 });
-
-  useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
-    const ro = new ResizeObserver((entries) => {
-      for (const entry of entries) {
-        containerDims.current = {
-          width: entry.contentRect.width,
-          height: entry.contentRect.height,
-        };
-      }
-    });
-    ro.observe(container);
-    requestAnimationFrame(() => {
-      if (container) {
-        containerDims.current = { width: container.clientWidth, height: container.clientHeight };
-      }
-    });
-    return () => ro.disconnect();
-  }, []);
 
   useEffect(() => {
     let cancelled = false;
     const render = async () => {
       const canvas = canvasRef.current;
-      const textLayerDiv = textLayerRef.current;
-      if (!canvas || !textLayerDiv) return;
+      const container = containerRef.current;
+      if (!canvas || !container) return;
 
       setRendering(true);
       try {
         const viewport = await getPageViewport(pageNumber, 1);
         if (!viewport || cancelled) return;
 
-        const containerWidth = containerDims.current.width - 32;
-        const containerHeight = containerDims.current.height - 32;
+        const containerWidth = container.clientWidth - 32;
+        const containerHeight = container.clientHeight - 32;
         const scaleW = containerWidth / viewport.width;
         const scaleH = containerHeight / viewport.height;
         const baseScale = Math.min(scaleW, scaleH);
@@ -77,24 +54,7 @@ export function PdfCanvas({ renderPage, getPageViewport, getPageAnnotations, get
         canvas.style.height = `${displayHeight}px`;
         setCanvasSize({ width: displayWidth, height: displayHeight });
 
-        textLayerDiv.innerHTML = '';
-        textLayerDiv.style.width = `${displayWidth}px`;
-        textLayerDiv.style.height = `${displayHeight}px`;
-
-        if (getPageTextContent) {
-          const textContent = await getPageTextContent(pageNumber);
-          if (textContent && !cancelled) {
-            const { TextLayer } = await import('pdfjs-dist');
-            const textViewport = await getPageViewport(pageNumber, finalScale);
-            const textLayer = new TextLayer({
-              textContentSource: textContent,
-              container: textLayerDiv,
-              viewport: textViewport,
-            });
-            await textLayer.render();
-          }
-        }
-
+        // Get link annotations
         if (getPageAnnotations) {
           const annotations = await getPageAnnotations(pageNumber);
           if (!cancelled) {
@@ -117,12 +77,14 @@ export function PdfCanvas({ renderPage, getPageViewport, getPageAnnotations, get
     };
     render();
     return () => { cancelled = true; };
-  }, [renderPage, getPageViewport, getPageAnnotations, getPageTextContent, pageNumber, zoom]);
+  }, [renderPage, getPageViewport, getPageAnnotations, pageNumber, zoom]);
 
+  // Swipe for page navigation (single finger)
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
     if (e.touches.length === 1) {
       touchStart.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
     }
+    // Pinch-to-zoom (two fingers)
     if (e.touches.length === 2) {
       touchStart.current = null;
       const dx = e.touches[0].clientX - e.touches[1].clientX;
@@ -139,7 +101,7 @@ export function PdfCanvas({ renderPage, getPageViewport, getPageAnnotations, get
       const dist = Math.hypot(dx, dy);
       const scale = dist / pinchStartDist.current;
       const newZoom = Math.min(4, Math.max(0.5, pinchStartZoom.current * scale));
-      onZoomChange(Math.round(newZoom * 20) / 20);
+      onZoomChange(Math.round(newZoom * 20) / 20); // snap to 5% increments
     }
   }, [onZoomChange]);
 
@@ -161,6 +123,7 @@ export function PdfCanvas({ renderPage, getPageViewport, getPageAnnotations, get
     touchStart.current = null;
   }, [onSwipeLeft, onSwipeRight]);
 
+  // Mouse wheel zoom (desktop)
   const handleWheel = useCallback((e: React.WheelEvent) => {
     if (e.ctrlKey || e.metaKey) {
       e.preventDefault();
@@ -185,17 +148,13 @@ export function PdfCanvas({ renderPage, getPageViewport, getPageAnnotations, get
           ref={canvasRef}
           className={`shadow-xl rounded-sm transition-opacity duration-200 ${rendering ? 'opacity-50' : 'opacity-100'}`}
         />
-        <div
-          ref={textLayerRef}
-          className="textLayer absolute top-0 left-0"
-        />
         {links.map((link, i) => (
           <a
             key={i}
             href={link.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="absolute border border-transparent hover:border-primary/40 hover:bg-primary/10 rounded-sm cursor-pointer transition-colors z-10"
+            className="absolute border border-transparent hover:border-primary/40 hover:bg-primary/10 rounded-sm cursor-pointer transition-colors"
             style={{
               left: `${link.left}px`,
               top: `${link.top}px`,

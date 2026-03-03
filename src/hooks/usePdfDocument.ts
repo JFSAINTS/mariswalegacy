@@ -1,16 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import * as pdfjsLib from 'pdfjs-dist';
 
-let pdfjsLibPromise: Promise<typeof import('pdfjs-dist')> | null = null;
-
-function getPdfjsLib() {
-  if (!pdfjsLibPromise) {
-    pdfjsLibPromise = import('pdfjs-dist').then((lib) => {
-      lib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${lib.version}/build/pdf.worker.min.mjs`;
-      return lib;
-    });
-  }
-  return pdfjsLibPromise;
-}
+pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
 
 export interface OutlineItem {
   title: string;
@@ -37,7 +28,6 @@ export function usePdfDocument(url: string) {
       try {
         setLoading(true);
         setError(null);
-        const pdfjsLib = await getPdfjsLib();
         const doc = await pdfjsLib.getDocument(url).promise;
         if (cancelled) return;
         pdfRef.current = doc;
@@ -145,15 +135,8 @@ export function usePdfDocument(url: string) {
     return annotations.filter((a: any) => a.subtype === 'Link' && a.url);
   }, []);
 
-  const getPageTextContent = useCallback(async (pageNum: number) => {
-    const doc = pdfRef.current;
-    if (!doc) return null;
-    const page = await doc.getPage(pageNum);
-    return await page.getTextContent();
-  }, []);
-
   return {
     numPages, loading, error, outline,
-    renderPage, getPageText, searchAllPages, resolveDestination, getPageViewport, getPageAnnotations, getPageTextContent,
+    renderPage, getPageText, searchAllPages, resolveDestination, getPageViewport, getPageAnnotations,
   };
 }

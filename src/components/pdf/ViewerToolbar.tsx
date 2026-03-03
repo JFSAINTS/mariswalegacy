@@ -1,6 +1,6 @@
 import {
   ChevronLeft, ChevronRight, Search, Bookmark, BookmarkCheck,
-  Menu, ZoomIn, ZoomOut, Moon, Sun, Download,
+  Menu, ZoomIn, ZoomOut, Moon, Sun, Languages,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,20 +12,18 @@ interface Props {
   onPageChange: (page: number) => void;
   onToggleSidebar: () => void;
   onToggleSearch: () => void;
+  onToggleTranslate: () => void;
   isBookmarked: boolean;
   onToggleBookmark: () => void;
   zoom: number;
   onZoomChange: (zoom: number) => void;
   isDark: boolean;
   onToggleTheme: () => void;
-  canInstallPwa?: boolean;
-  onInstallPwa?: () => void;
 }
 
 export function ViewerToolbar({
   currentPage, numPages, onPageChange, onToggleSidebar, onToggleSearch,
-  isBookmarked, onToggleBookmark, zoom, onZoomChange, isDark, onToggleTheme,
-  canInstallPwa, onInstallPwa,
+  onToggleTranslate, isBookmarked, onToggleBookmark, zoom, onZoomChange, isDark, onToggleTheme,
 }: Props) {
   const [editing, setEditing] = useState(false);
   const [pageInput, setPageInput] = useState('');
@@ -47,11 +45,18 @@ export function ViewerToolbar({
         <Button variant="ghost" size="icon" onClick={() => onZoomChange(Math.min(3, zoom + 0.25))} className="h-8 w-8 hidden sm:flex">
           <ZoomIn className="h-4 w-4" />
         </Button>
-        {canInstallPwa && (
-          <Button variant="ghost" size="icon" onClick={onInstallPwa} className="h-8 w-8" title="Instalar como app">
-            <Download className="h-4 w-4 text-primary" />
-          </Button>
-        )}
+        <Button variant="ghost" size="icon" onClick={onToggleSearch} className="h-8 w-8">
+          <Search className="h-4 w-4" />
+        </Button>
+        <Button variant="ghost" size="icon" onClick={onToggleTranslate} className="h-8 w-8" title="Traducir página">
+          <Languages className="h-4 w-4" />
+        </Button>
+        <Button variant="ghost" size="icon" onClick={onToggleBookmark} className="h-8 w-8">
+          {isBookmarked ? <BookmarkCheck className="h-4 w-4 text-primary" /> : <Bookmark className="h-4 w-4" />}
+        </Button>
+        <Button variant="ghost" size="icon" onClick={onToggleTheme} className="h-8 w-8">
+          {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+        </Button>
       </div>
 
       <div className="flex items-center gap-0.5 mx-auto">
@@ -84,20 +89,9 @@ export function ViewerToolbar({
         </Button>
       </div>
 
-      <div className="flex items-center gap-0.5 shrink-0">
-        <Button variant="ghost" size="icon" onClick={onToggleTheme} className="h-8 w-8">
-          {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-        </Button>
-        <Button variant="ghost" size="icon" onClick={onToggleSearch} className="h-8 w-8">
-          <Search className="h-4 w-4" />
-        </Button>
-        <Button variant="ghost" size="icon" onClick={onToggleBookmark} className="h-8 w-8">
-          {isBookmarked ? <BookmarkCheck className="h-4 w-4 text-primary" /> : <Bookmark className="h-4 w-4" />}
-        </Button>
-        <Button variant="ghost" size="icon" onClick={onToggleSidebar} className="shrink-0">
-          <Menu className="h-5 w-5" />
-        </Button>
-      </div>
+      <Button variant="ghost" size="icon" onClick={onToggleSidebar} className="shrink-0">
+        <Menu className="h-5 w-5" />
+      </Button>
     </header>
   );
 }
