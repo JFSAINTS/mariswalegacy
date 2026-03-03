@@ -29,7 +29,6 @@ export function PdfCanvas({ renderPage, getPageViewport, getPageAnnotations, get
   const pinchStartZoom = useRef<number>(1);
   const containerDims = useRef<{ width: number; height: number }>({ width: 0, height: 0 });
 
-  // Cache container dimensions via ResizeObserver to avoid forced reflow
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
@@ -42,7 +41,6 @@ export function PdfCanvas({ renderPage, getPageViewport, getPageAnnotations, get
       }
     });
     ro.observe(container);
-    // Defer initial measurement to avoid forced reflow
     requestAnimationFrame(() => {
       if (container) {
         containerDims.current = { width: container.clientWidth, height: container.clientHeight };
@@ -79,7 +77,6 @@ export function PdfCanvas({ renderPage, getPageViewport, getPageAnnotations, get
         canvas.style.height = `${displayHeight}px`;
         setCanvasSize({ width: displayWidth, height: displayHeight });
 
-        // Render text layer for selection/copy
         textLayerDiv.innerHTML = '';
         textLayerDiv.style.width = `${displayWidth}px`;
         textLayerDiv.style.height = `${displayHeight}px`;
@@ -98,7 +95,6 @@ export function PdfCanvas({ renderPage, getPageViewport, getPageAnnotations, get
           }
         }
 
-        // Get link annotations
         if (getPageAnnotations) {
           const annotations = await getPageAnnotations(pageNumber);
           if (!cancelled) {
@@ -123,12 +119,10 @@ export function PdfCanvas({ renderPage, getPageViewport, getPageAnnotations, get
     return () => { cancelled = true; };
   }, [renderPage, getPageViewport, getPageAnnotations, getPageTextContent, pageNumber, zoom]);
 
-  // Swipe for page navigation (single finger)
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
     if (e.touches.length === 1) {
       touchStart.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
     }
-    // Pinch-to-zoom (two fingers)
     if (e.touches.length === 2) {
       touchStart.current = null;
       const dx = e.touches[0].clientX - e.touches[1].clientX;
@@ -167,7 +161,6 @@ export function PdfCanvas({ renderPage, getPageViewport, getPageAnnotations, get
     touchStart.current = null;
   }, [onSwipeLeft, onSwipeRight]);
 
-  // Mouse wheel zoom (desktop)
   const handleWheel = useCallback((e: React.WheelEvent) => {
     if (e.ctrlKey || e.metaKey) {
       e.preventDefault();
