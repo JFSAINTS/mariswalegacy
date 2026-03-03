@@ -37,9 +37,6 @@ export function ViewerToolbar({
 
   return (
     <header className="h-14 flex items-center px-2 gap-1 border-b bg-card/90 backdrop-blur-sm shrink-0 z-20">
-      <Button variant="ghost" size="icon" onClick={onToggleSidebar} className="shrink-0">
-        <Menu className="h-5 w-5" />
-      </Button>
 
       <div className="flex items-center gap-0.5 mx-auto">
         <Button variant="ghost" size="icon" onClick={() => onPageChange(currentPage - 1)} disabled={currentPage <= 1} className="h-8 w-8">
@@ -90,6 +87,12 @@ export function ViewerToolbar({
         </Button>
         <Button variant="ghost" size="icon" onClick={onToggleTheme} className="h-8 w-8">
           {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+        </Button>
+
+        <div className="w-3" />
+
+        <Button variant="ghost" size="icon" onClick={onToggleSidebar} className="shrink-0 h-8 w-8">
+          <Menu className="h-5 w-5" />
         </Button>
       </div>
     </header>
