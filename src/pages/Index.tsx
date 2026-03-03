@@ -6,7 +6,6 @@ import { PdfCanvas } from '@/components/pdf/PdfCanvas';
 import { ViewerToolbar } from '@/components/pdf/ViewerToolbar';
 import { SidePanel } from '@/components/pdf/SidePanel';
 import { SearchOverlay } from '@/components/pdf/SearchOverlay';
-import { TranslateOverlay } from '@/components/pdf/TranslateOverlay';
 import { Loader2, FileWarning } from 'lucide-react';
 
 const PDF_URL = '/sample.pdf';
@@ -16,12 +15,11 @@ const Index = () => {
   const [zoom, setZoom] = useState(1);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
-  const [translateOpen, setTranslateOpen] = useState(false);
   const { theme, setTheme } = useTheme();
 
   const {
     numPages, loading, error, outline,
-    renderPage, searchAllPages, resolveDestination, getPageViewport, getPageText, getPageAnnotations,
+    renderPage, searchAllPages, resolveDestination, getPageViewport, getPageAnnotations,
   } = usePdfDocument(PDF_URL);
 
   const {
@@ -78,7 +76,6 @@ const Index = () => {
         onPageChange={handlePageChange}
         onToggleSidebar={() => setSidebarOpen(prev => !prev)}
         onToggleSearch={() => setSearchOpen(prev => !prev)}
-        onToggleTranslate={() => setTranslateOpen(prev => !prev)}
         isBookmarked={isBookmarked(currentPage)}
         onToggleBookmark={() => toggleBookmark(currentPage)}
         zoom={zoom}
@@ -119,14 +116,6 @@ const Index = () => {
           onClose={() => setSearchOpen(false)}
           onSearch={searchAllPages}
           onNavigate={handleSearchNavigate}
-        />
-
-        <TranslateOverlay
-          open={translateOpen}
-          onClose={() => setTranslateOpen(false)}
-          getPageText={getPageText}
-          currentPage={currentPage}
-          numPages={numPages}
         />
       </div>
     </div>
