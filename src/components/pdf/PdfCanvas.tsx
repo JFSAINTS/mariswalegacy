@@ -25,6 +25,25 @@ export function PdfCanvas({ renderPage, getPageViewport, getPageAnnotations, pag
   const touchStart = useRef<{ x: number; y: number } | null>(null);
   const pinchStartDist = useRef<number | null>(null);
   const pinchStartZoom = useRef<number>(1);
+  const containerDims = useRef<{ width: number; height: number }>({ width: 0, height: 0 });
+
+  // Track container size via ResizeObserver to avoid forced reflow
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        containerDims.current = {
+          width: entry.contentRect.width,
+          height: entry.contentRect.height,
+        };
+      }
+    });
+    ro.observe(el);
+    // seed initial value
+    containerDims.current = { width: el.clientWidth, height: el.clientHeight };
+    return () => ro.disconnect();
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -38,8 +57,8 @@ export function PdfCanvas({ renderPage, getPageViewport, getPageAnnotations, pag
         const viewport = await getPageViewport(pageNumber, 1);
         if (!viewport || cancelled) return;
 
-        const containerWidth = container.clientWidth - 32;
-        const containerHeight = container.clientHeight - 32;
+        const containerWidth = containerDims.current.width - 32;
+        const containerHeight = containerDims.current.height - 32;
         const scaleW = containerWidth / viewport.width;
         const scaleH = containerHeight / viewport.height;
         const baseScale = Math.min(scaleW, scaleH);
