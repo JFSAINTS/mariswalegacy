@@ -1,7 +1,14 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import * as pdfjsLib from 'pdfjs-dist';
 
-pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
+let pdfjsLib: typeof import('pdfjs-dist') | null = null;
+
+async function getPdfjs() {
+  if (!pdfjsLib) {
+    pdfjsLib = await import('pdfjs-dist');
+    pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
+  }
+  return pdfjsLib;
+}
 
 export interface OutlineItem {
   title: string;
@@ -28,7 +35,8 @@ export function usePdfDocument(url: string) {
       try {
         setLoading(true);
         setError(null);
-        const doc = await pdfjsLib.getDocument(url).promise;
+        const pdfjs = await getPdfjs();
+        const doc = await pdfjs.getDocument(url).promise;
         if (cancelled) return;
         pdfRef.current = doc;
         setNumPages(doc.numPages);
