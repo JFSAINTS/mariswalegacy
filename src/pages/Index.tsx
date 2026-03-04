@@ -61,10 +61,14 @@ const Index = () => {
 
       <div className="flex flex-1 overflow-hidden relative">
         {loading ? (
-          <div className="flex-1 flex items-center justify-center">
-            <div className="flex flex-col items-center gap-3">
-              <Loader2 className="h-8 w-8 animate-spin text-primary" />
-              <p className="text-sm text-muted-foreground">Cargando documento...</p>
+          <div className="flex-1 flex items-center justify-center bg-muted/30">
+            <div className="w-full max-w-[600px] mx-auto flex flex-col items-center gap-4 px-4">
+              <div className="w-full aspect-[1/1.414] bg-card rounded shadow-xl flex items-center justify-center">
+                <div className="flex flex-col items-center gap-3">
+                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                  <p className="text-sm text-muted-foreground">Cargando documento...</p>
+                </div>
+              </div>
             </div>
           </div>
         ) : error ? (
