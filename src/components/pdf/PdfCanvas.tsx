@@ -158,15 +158,16 @@ export function PdfCanvas({ renderPage, getPageViewport, getPageAnnotations, pag
     <div
       ref={containerRef}
       className="flex-1 overflow-auto flex items-center justify-center p-4 bg-secondary/30 scrollbar-thin"
+      style={{ contain: 'layout style' }}
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
       onWheel={handleWheel}
     >
-      <div className="relative">
+      <div className="relative" style={{ contain: 'layout' }}>
         <canvas
           ref={canvasRef}
-          className={`shadow-xl rounded-sm transition-opacity duration-200 ${rendering ? 'opacity-50' : 'opacity-100'}`}
+          className={`shadow-xl rounded-sm ${rendering ? 'opacity-50' : 'opacity-100'}`}
           style={canvasSize.width > 0 ? { width: canvasSize.width, height: canvasSize.height } : { width: 'min(calc(100vw - 32px), 60vh)', aspectRatio: '1 / 1.414' }}
         />
         {links.map((link, i) => (
