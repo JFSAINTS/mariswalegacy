@@ -94,15 +94,11 @@ export function SearchOverlay({ open, onClose, onSearch, onNavigate }: Props) {
                   className="w-full text-left px-3 py-2.5 hover:bg-secondary/50 transition-colors"
                 >
                   <span className="text-xs font-semibold text-primary">Página {r.page}</span>
-                  <p
-                    className="text-sm text-muted-foreground mt-0.5 line-clamp-2"
-                    dangerouslySetInnerHTML={{
-                      __html: r.snippet.replace(
-                        new RegExp(`(${escapeRegex(query)})`, 'gi'),
-                        '<mark>$1</mark>'
-                      ),
-                    }}
-                  />
+                  <p className="text-sm text-muted-foreground mt-0.5 line-clamp-2">
+                    {r.snippet.split(new RegExp(`(${escapeRegex(query)})`, 'gi')).map((part, idx) =>
+                      idx % 2 === 1 ? <mark key={idx}>{part}</mark> : part
+                    )}
+                  </p>
                 </button>
               ))}
             </div>
