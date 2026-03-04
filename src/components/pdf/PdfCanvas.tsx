@@ -21,6 +21,7 @@ export function PdfCanvas({ renderPage, getPageViewport, getPageAnnotations, pag
   const containerRef = useRef<HTMLDivElement>(null);
   const [rendering, setRendering] = useState(false);
   const [links, setLinks] = useState<{ url: string; left: number; top: number; width: number; height: number }[]>([]);
+  // Reserve space with A4 aspect ratio (1:1.414) to prevent layout shift
   const [canvasSize, setCanvasSize] = useState<{ width: number; height: number }>({ width: 0, height: 0 });
   const touchStart = useRef<{ x: number; y: number } | null>(null);
   const pinchStartDist = useRef<number | null>(null);
@@ -166,6 +167,7 @@ export function PdfCanvas({ renderPage, getPageViewport, getPageAnnotations, pag
         <canvas
           ref={canvasRef}
           className={`shadow-xl rounded-sm transition-opacity duration-200 ${rendering ? 'opacity-50' : 'opacity-100'}`}
+          style={canvasSize.width > 0 ? { width: canvasSize.width, height: canvasSize.height } : { width: 'min(calc(100vw - 32px), 60vh)', aspectRatio: '1 / 1.414' }}
         />
         {links.map((link, i) => (
           <a
