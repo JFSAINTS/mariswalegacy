@@ -43,31 +43,6 @@ const Index = () => {
     setSearchOpen(false);
   }, []);
 
-  if (loading) {
-    return (
-      <div className="h-[100dvh] flex items-center justify-center bg-background">
-        <div className="flex flex-col items-center gap-3">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">Cargando documento...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="h-[100dvh] flex items-center justify-center bg-background">
-        <div className="text-center">
-          <FileWarning className="h-10 w-10 text-destructive mx-auto mb-3" />
-          <p className="text-destructive font-medium">{error}</p>
-          <p className="text-sm text-muted-foreground mt-2">
-            Verifica que el archivo PDF existe en /public/sample.pdf
-          </p>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="h-[100dvh] flex flex-col bg-background overflow-hidden">
       <ViewerToolbar
@@ -85,38 +60,59 @@ const Index = () => {
       />
 
       <div className="flex flex-1 overflow-hidden relative">
-        <SidePanel
-          open={sidebarOpen}
-          onClose={() => setSidebarOpen(false)}
-          outline={outline}
-          bookmarks={bookmarks}
-          onNavigate={(page) => { setCurrentPage(page); setSidebarOpen(false); }}
-          onOutlineClick={handleOutlineClick}
-          onRemoveBookmark={removeBookmark}
-          onUpdateBookmark={updateBookmark}
-          numPages={numPages}
-          currentPage={currentPage}
-          renderPage={renderPage}
-          getPageViewport={getPageViewport}
-        />
+        {loading ? (
+          <div className="flex-1 flex items-center justify-center">
+            <div className="flex flex-col items-center gap-3">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              <p className="text-sm text-muted-foreground">Cargando documento...</p>
+            </div>
+          </div>
+        ) : error ? (
+          <div className="flex-1 flex items-center justify-center">
+            <div className="text-center">
+              <FileWarning className="h-10 w-10 text-destructive mx-auto mb-3" />
+              <p className="text-destructive font-medium">{error}</p>
+              <p className="text-sm text-muted-foreground mt-2">
+                Verifica que el archivo PDF existe en /public/sample.pdf
+              </p>
+            </div>
+          </div>
+        ) : (
+          <>
+            <SidePanel
+              open={sidebarOpen}
+              onClose={() => setSidebarOpen(false)}
+              outline={outline}
+              bookmarks={bookmarks}
+              onNavigate={(page) => { setCurrentPage(page); setSidebarOpen(false); }}
+              onOutlineClick={handleOutlineClick}
+              onRemoveBookmark={removeBookmark}
+              onUpdateBookmark={updateBookmark}
+              numPages={numPages}
+              currentPage={currentPage}
+              renderPage={renderPage}
+              getPageViewport={getPageViewport}
+            />
 
-        <PdfCanvas
-          renderPage={renderPage}
-          getPageViewport={getPageViewport}
-          getPageAnnotations={getPageAnnotations}
-          pageNumber={currentPage}
-          zoom={zoom}
-          onZoomChange={setZoom}
-          onSwipeLeft={() => handlePageChange(currentPage + 1)}
-          onSwipeRight={() => handlePageChange(currentPage - 1)}
-        />
+            <PdfCanvas
+              renderPage={renderPage}
+              getPageViewport={getPageViewport}
+              getPageAnnotations={getPageAnnotations}
+              pageNumber={currentPage}
+              zoom={zoom}
+              onZoomChange={setZoom}
+              onSwipeLeft={() => handlePageChange(currentPage + 1)}
+              onSwipeRight={() => handlePageChange(currentPage - 1)}
+            />
 
-        <SearchOverlay
-          open={searchOpen}
-          onClose={() => setSearchOpen(false)}
-          onSearch={searchAllPages}
-          onNavigate={handleSearchNavigate}
-        />
+            <SearchOverlay
+              open={searchOpen}
+              onClose={() => setSearchOpen(false)}
+              onSearch={searchAllPages}
+              onNavigate={handleSearchNavigate}
+            />
+          </>
+        )}
       </div>
     </div>
   );
